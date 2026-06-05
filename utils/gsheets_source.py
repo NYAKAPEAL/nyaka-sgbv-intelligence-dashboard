@@ -23,6 +23,12 @@ import streamlit as st
 # Refresh window in seconds. 1800 = 30 minutes. Lower = fresher but more slow loads.
 REFRESH_SECONDS = 1800
 
+# Records the real reason a live fetch failed, per stream, so it can be shown to
+# the user instead of being silently swallowed.
+_FETCH_ERRORS = {}
+def fetch_errors():
+    return dict(_FETCH_ERRORS)
+
 # Path to the service-account key file (you place this in the app folder yourself).
 # It is git-ignored and must NEVER be committed or shared.
 CREDS_PATH = os.path.join(os.path.dirname(__file__), "..", "google_service_account.json")
@@ -149,10 +155,11 @@ def _fetch_sheet(stream_key: str) -> tuple:
                     # blank cells come back as "" — treat as missing
                     df = df.replace("", pd.NA)
                     if len(df):
+                        _FETCH_ERRORS.pop(stream_key, None)
                         return df, "live"
-        except Exception:
-            # fall through to CSV
-            pass
+                _FETCH_ERRORS[stream_key] = "Live sheet returned no rows (empty worksheet or wrong tab)."
+        except Exception as e:
+            _FETCH_ERRORS[stream_key] = f"{type(e).__name__}: {str(e)[:400]}"
 
     # 2. Fallback: local CSV
     if fallback and os.path.exists(fallback):
@@ -219,3 +226,9 @@ def render_data_status(st_module, C):
                           key="force_refresh_btn"):
         force_refresh()
         st.rerun()
+    # Surface the real reason a live fetch failed, so it isn't silently hidden.
+    errs = fetch_errors()
+    if errs:
+        with st.sidebar.expander("⚠ Data source details", expanded=(mode != "live")):
+            for stream, msg in errs.items():
+                st.markdown(f"**{stream}**: {msg}")
