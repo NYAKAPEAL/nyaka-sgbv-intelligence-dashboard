@@ -1,0 +1,26 @@
+# ── SECRETS & CREDENTIALS (never commit) ──────────────────────────
+google_service_account.json
+*service_account*.json
+.streamlit/secrets.toml
+*.key
+*.pem
+
+# ── SENSITIVE DATA (never commit raw survivor/perpetrator data) ────
+data/
+*.csv
+*.xlsx
+*.xls
+
+# ── Python ─────────────────────────────────────────────────────────
+*.pyc
+__pycache__/
+*.pyo
+.venv/
+venv/
+.env
+
+# ── OS / editor ────────────────────────────────────────────────────
+.DS_Store
+.ipynb_checkpoints/
+diagnose_narratives.py
+test_connection.py

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nyaka SGBV Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --pu:    #5B2D8E; --pu-dk: #2A0E5C; --pu-lt: #EDE7F6; --pu-xlt:#F5F2FC;
+  --or:    #E07B29; --or-lt: #FFF3E0;
+  --gd:    #C9A84C; --gd-lt: #FFFDE7;
+  --gn:    #2E7D32; --gn-lt: #E8F5E9;
+  --tl:    #00695C; --tl-lt: #E0F2F1;
+  --rd:    #C62828; --rd-lt: #FFEBEE;
+  --am:    #E65100; --am-lt: #FFF3E0;
+  --bl:    #1565C0; --bl-lt: #E3F2FD;
+  --bg:    #F0EEF8; --bg-panel: #FAFAFA;
+  --text:  #1A1A2E; --text-2: #555; --text-3: #888;
+  --border:#E0DCF0; --border-2:#CCC8DE;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ── */
+.shell {
+  display: flex;
+  height: 100vh;
+  max-height: 900px;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 8px 48px rgba(42,14,92,0.18);
+  margin: 12px;
+  border: 0.5px solid var(--border);
+}
+
+/* ── SIDEBAR ── */
+.sb {
+  width: 212px;
+  flex-shrink: 0;
+  background: var(--pu-dk);
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+}
+.sb-head {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sb-logo-row { display: flex; align-items: center; gap: 8px; }
+.sb-shield { font-size: 22px; }
+.sb-title { font-size: 11.5px; font-weight: 600; color: #fff; line-height: 1.2; }
+.sb-sub { font-size: 8px; color: rgba(255,255,255,0.42); margin-top: 1px; }
+
+.sb-user {
+  padding: 9px 16px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sb-av {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #6B3FBE;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600; color: #fff; flex-shrink: 0;
+}
+.sb-uname { font-size: 11px; font-weight: 500; color: #fff; }
+.sb-urole { font-size: 8px; color: rgba(255,255,255,0.42); }
+
+.sb-nav { flex: 1; padding: 6px 0; overflow-y: auto; }
+.sb-grp {
+  font-size: 7.5px; color: rgba(255,255,255,0.28);
+  padding: 10px 16px 3px; text-transform: uppercase; letter-spacing: 0.08em;
+}
+.nv {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6.5px 16px; font-size: 10px; color: rgba(255,255,255,0.62);
+  cursor: pointer; transition: background 0.12s;
+  position: relative;
+}
+.nv:hover { background: rgba(255,255,255,0.06); }
+.nv.active {
+  background: rgba(255,255,255,0.13); color: #fff;
+  border-right: 2px solid var(--or);
+}
+.nv-icon { font-size: 14px; }
+.nbadge {
+  margin-left: auto; background: var(--rd); color: #fff;
+  font-size: 8px; padding: 1px 5px; border-radius: 8px; font-weight: 600;
+}
+
+.sb-filters {
+  padding: 8px 16px 4px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.sb-flabel {
+  font-size: 8px; color: rgba(255,255,255,0.35);
+  margin-top: 6px; margin-bottom: 2px;
+}
+.sb-sel {
+  width: 100%; font-size: 9px; padding: 4px 6px;
+  border: 0.5px solid rgba(255,255,255,0.16); border-radius: 4px;
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.82);
+  font-family: inherit;
+}
+.sb-stat {
+  padding: 8px 16px; font-size: 8px; color: rgba(255,255,255,0.38);
+  line-height: 1.9; border-top: 1px solid rgba(255,255,255,0.08);
+}
+.sb-safe {
+  margin: 5px 10px 10px;
+  padding: 7px 10px;
+  background: rgba(198,40,40,0.18); border-left: 2px solid #EF5350;
+  border-radius: 4px; font-size: 8px; color: #EF9A9A; line-height: 1.5;
+}
+
+/* ── MAIN ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+
+.topbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 18px; background: #fff;
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+.topbar-title { font-size: 12px; font-weight: 500; flex: 1; color: var(--text); }
+.chip {
+  font-size: 8.5px; padding: 2.5px 9px; border-radius: 10px;
+}
+.chip-pu { background: var(--pu-lt); color: var(--pu-dk); font-weight: 600; }
+.chip-or { background: var(--or-lt); color: #7B4800; font-weight: 600; }
+.chip-fil {
+  font-size: 8.5px; padding: 2.5px 9px;
+  border: 0.5px solid var(--border-2); border-radius: 8px;
+  color: var(--text-2); cursor: pointer;
+}
+.sync-tag { font-size: 8px; color: var(--text-3); }
+
+.content {
+  flex: 1; overflow-y: auto; padding: 10px 16px 16px;
+  display: flex; flex-direction: column; gap: 9px;
+}
+
+/* ── GRADIENT HEADER ── */
+.grad-hdr {
+  background: linear-gradient(135deg, var(--pu-dk) 0%, var(--pu) 58%, var(--or) 100%);
+  border-radius: 8px; padding: 14px 20px;
+}
+.gh-title { color: #fff; font-size: 14px; font-weight: 600; }
+.gh-sub { color: rgba(255,255,255,0.72); font-size: 9px; margin-top: 3px; }
+
+/* ── STREAM BADGES ── */
+.streams { display: flex; gap: 5px; flex-wrap: wrap; }
+.stbdg {
+  font-size: 8.5px; padding: 3px 10px; border-radius: 12px; font-weight: 600;
+}
+
+/* ── CRISIS ALERT ── */
+.alert-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; background: var(--rd-lt);
+  border: 0.5px solid #EF9A9A; border-radius: 6px;
+  font-size: 9.5px; color: var(--rd);
+}
+.alert-icon { font-size: 14px; flex-shrink: 0; }
+
+/* ── KPI GRID ── */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 7px; }
+.kc {
+  background: #fff; border-radius: 8px; padding: 12px 14px;
+  border-left: 3px solid var(--pu);
+  box-shadow: 0 1px 6px rgba(42,14,92,0.06);
+}
+.kc.or { border-left-color: var(--or); }
+.kc.gn { border-left-color: var(--gn); }
+.kc.rd { border-left-color: var(--rd); }
+.kc.tl { border-left-color: var(--tl); }
+.kc.gd { border-left-color: var(--gd); }
+.kc.bl { border-left-color: var(--bl); }
+.kl { font-size: 8.5px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+.kv { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.1; }
+.kn { font-size: 8px; margin-top: 2px; }
+.kup { color: var(--gn); } .kdn { color: var(--rd); } .kmt { color: var(--text-3); }
+
+/* ── CHART ROWS ── */
+.row2 { display: grid; grid-template-columns: 2.4fr 1fr; gap: 9px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
+.cc {
+  background: #fff; border: 0.5px solid var(--border);
+  border-radius: 8px; padding: 11px 13px;
+}
+.ct {
+  font-size: 9.5px; font-weight: 500; color: var(--text-2);
+  margin-bottom: 7px;
+}
+
+/* ── MINI CHART ── */
+.hbar { display: flex; align-items: center; gap: 5px; margin-bottom: 3.5px; }
+.hl { font-size: 8px; color: var(--text-2); width: 82px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ht { flex: 1; height: 5.5px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+.hf { height: 5.5px; border-radius: 3px; }
+.hv { font-size: 8px; color: var(--text-3); width: 32px; text-align: right; flex-shrink: 0; }
+
+/* donut legend */
+.dl { flex: 1; display: flex; flex-direction: column; gap: 4.5px; }
+.dli { display: flex; align-items: center; gap: 5px; font-size: 8px; color: var(--text-2); }
+.dsw { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.dval { margin-left: auto; font-weight: 600; color: var(--text); font-size: 8.5px; }
+
+/* ── LEGAL FUNNEL ── */
+.lfrow { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+.lfl { font-size: 8px; color: var(--text-2); width: 70px; flex-shrink: 0; }
+.lfbar { height: 6px; border-radius: 3px; }
+.lfv { font-size: 8px; color: var(--text-3); margin-left: 3px; }
+
+/* ── MAP ── */
+.mapcard {
+  background: linear-gradient(135deg, #D9EFF0 0%, #E8E4F8 50%, #E9F4DF 100%);
+  border-radius: 6px; overflow: hidden; height: 112px; position: relative;
+}
+
+/* ── HIV BAR ── */
+.hiv-bar { display: flex; height: 9px; border-radius: 5px; overflow: hidden; margin-bottom: 5px; }
+
+/* ── PROGRESS ── */
+.pb { margin-bottom: 6px; }
+.pbl { display: flex; justify-content: space-between; font-size: 8px; color: var(--text-2); margin-bottom: 2px; }
+.pbt { height: 5.5px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+.pbf { height: 5.5px; border-radius: 3px; }
+
+/* ── RISK BADGE ── */
+.rbdg { font-size: 7.5px; font-weight: 700; padding: 1.5px 6px; border-radius: 8px; }
+.rh { background: var(--rd-lt); color: var(--rd); }
+.rm { background: var(--am-lt); color: var(--am); }
+.rl { background: var(--gn-lt); color: var(--gn); }
+
+/* ── SAFE TIP ── */
+.stip {
+  font-size: 8.5px; color: #5D4037;
+  padding: 4.5px 8px; background: #FFFDF5;
+  border-left: 2.5px solid var(--gd); border-radius: 3px;
+  margin-bottom: 4px; line-height: 1.4;
+}
+
+/* ── MAP ELEMENTS ── */
+.mdot { position: absolute; border-radius: 50%; box-shadow: 0 0 0 2.5px rgba(255,255,255,0.8); }
+.hcmark { position: absolute; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ══ SIDEBAR ══ -->
+  <div class="sb">
+    <div class="sb-head">
+      <div class="sb-logo-row">
+        <div class="sb-shield">🛡️</div>
+        <div>
+          <div class="sb-title">Nyaka SGBV Intelligence</div>
+          <div class="sb-sub">Kanungu · Rukungiri · Rubanda</div>
+        </div>
+      </div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-av">DA</div>
+      <div>
+        <div class="sb-uname">Dag Ainamani</div>
+        <div class="sb-urole">Admin · Village-level GIS access</div>
+      </div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-grp">Programme</div>
+      <div class="nv active">
+        <span class="nv-icon">📊</span>Executive overview
+      </div>
+      <div class="nv">
+        <span class="nv-icon">👤</span>Survivors
+        <span class="nbadge">133</span>
+      </div>
+      <div class="nv">
+        <span class="nv-icon">⚖️</span>Perpetrators &amp; legal
+      </div>
+      <div class="nv">
+        <span class="nv-icon">🌍</span>Prevention
+      </div>
+      <div class="sb-grp">Intelligence</div>
+      <div class="nv">
+        <span class="nv-icon">🗺️</span>GIS dashboard
+      </div>
+      <div class="nv">
+        <span class="nv-icon">📈</span>MEL analytics
+      </div>
+      <div class="nv">
+        <span class="nv-icon">🧠</span>Mental health
+        <span class="nbadge">304</span>
+      </div>
+      <div class="nv">
+        <span class="nv-icon">📄</span>Reports centre
+      </div>
+      <div class="nv">
+        <span class="nv-icon">🔍</span>Data quality
+      </div>
+    </div>
+    <div class="sb-filters">
+      <div class="sb-flabel">Year</div>
+      <select class="sb-sel"><option>2022 – 2026 (all)</option></select>
+      <div class="sb-flabel">District</div>
+      <select class="sb-sel"><option>All districts</option><option>Kanungu</option><option>Rukungiri</option><option>Rubanda</option></select>
+      <div class="sb-flabel">Violence type</div>
+      <select class="sb-sel"><option>All types</option><option>Defilement</option><option>Rape</option></select>
+      <div class="sb-flabel">Gender</div>
+      <select class="sb-sel"><option>All</option><option>Female</option><option>Male</option></select>
+    </div>
+    <div class="sb-stat">
+      👤 2,031 survivors enrolled<br>
+      ⚖️ 738 perpetrators tracked<br>
+      🌍 1,863 sessions · 464K reached<br>
+      🏫 818 school visits · 16,464 students<br>
+      🧬 1,005 HIV tests (V3 field)
+    </div>
+    <div class="sb-safe">🔒 Survivor-safe mode<br>All PII anonymised · Session audited<br>GPS jittered ±300m</div>
+  </div>
+
+  <!-- ══ MAIN ══ -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">Executive overview — Nyaka SGBV Intelligence Platform</div>
+      <span class="chip chip-pu">2022–2026</span>
+      <span class="chip chip-or">All districts</span>
+      <span class="chip-fil">All violence ▾</span>
+      <span class="chip-fil">Gender ▾</span>
+      <span class="sync-tag">Synced: 29 May 2026 11:00 EAT</span>
+    </div>
+
+    <div class="content">
+      <!-- Gradient header -->
+      <div class="grad-hdr">
+        <div class="gh-title">🛡️ Nyaka SGBV Intelligence Platform · Real Data · 2022–2026</div>
+        <div class="gh-sub">Integrated MEAL dashboard · Survivor · Perpetrator · Outreach · Schools · GIS-enabled · Survivor-safe · Role-restricted</div>
+      </div>
+
+      <!-- Stream badges -->
+      <div class="streams">
+        <span class="stbdg" style="background:#EDE7F6;color:#2A0E5C">👤 2,031 survivors enrolled</span>
+        <span class="stbdg" style="background:#FFEBEE;color:#C62828">⚖️ 738 perpetrators · 77% arrested</span>
+        <span class="stbdg" style="background:#E0F2F1;color:#00695C">🌍 1,863 outreach · 464K reached</span>
+        <span class="stbdg" style="background:#FFFDE7;color:#827717">🏫 818 school · 16,464 students</span>
+        <span class="stbdg" style="background:#E3F2FD;color:#1565C0">🧬 1,005 HIV tests (V3 new)</span>
+      </div>
+
+      <!-- Alert -->
+      <div class="alert-bar">
+        <span class="alert-icon">🚨</span>
+        <strong>304 crisis-flagged survivors</strong> require Clinical Lead review — 159 URGENT · 81 HIGH ·
+        Avg days to arrest: <strong>47 days</strong> · 55 court convictions (7.5% conviction rate)
+      </div>
+
+      <!-- KPI Row 1 -->
+      <div class="kpi-grid">
+        <div class="kc">
+          <div class="kl">Total survivors enrolled</div>
+          <div class="kv">2,031</div>
+          <div class="kn kup">▲ 18% year-on-year · 95% female</div>
+        </div>
+        <div class="kc or">
+          <div class="kl">Defilement cases</div>
+          <div class="kv">1,337</div>
+          <div class="kn kmt">66% of total · mainly children</div>
+        </div>
+        <div class="kc bl">
+          <div class="kl">Perpetrators arrested</div>
+          <div class="kv">571</div>
+          <div class="kn kup">77% arrest rate ✅ target 75%</div>
+        </div>
+        <div class="kc gn">
+          <div class="kl">Court convictions won</div>
+          <div class="kv">55</div>
+          <div class="kn kdn">7.5% rate · 320 still in court</div>
+        </div>
+      </div>
+
+      <!-- KPI Row 2 -->
+      <div class="kpi-grid">
+        <div class="kc tl">
+          <div class="kl">Outreach sessions</div>
+          <div class="kv">1,863</div>
+          <div class="kn kup">✅ 621% of 300-session target</div>
+        </div>
+        <div class="kc gd">
+          <div class="kl">Total people reached</div>
+          <div class="kv">464K</div>
+          <div class="kn kup">✅ 928% of 50K target</div>
+        </div>
+        <div class="kc">
+          <div class="kl">Avg days to arrest (V3)</div>
+          <div class="kv">47</div>
+          <div class="kn kmt">days from enrollment · median 48d</div>
+        </div>
+        <div class="kc rd">
+          <div class="kl">Crisis flags pending review</div>
+          <div class="kv">304</div>
+          <div class="kn kdn">Urgent clinical review required</div>
+        </div>
+      </div>
+
+      <!-- Row: Trend + Donut -->
+      <div class="row2">
+        <div class="cc">
+          <div class="ct">Monthly survivor enrollments — real data 2022–2026 (2,031 records)</div>
+          <svg viewBox="0 0 310 65" height="65" style="display:block;width:100%">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#5B2D8E" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#5B2D8E" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <polyline fill="url(#g1)" stroke="none"
+              points="0,62 0,47 14,44 28,41 42,38 56,36 70,33 84,31 98,29 112,27 126,25 140,24 154,26 168,20 182,16 196,13 210,11 224,9 238,8 252,7 266,7 280,9 294,7 308,6 310,62"/>
+            <polyline fill="none" stroke="#5B2D8E" stroke-width="1.8" stroke-linejoin="round"
+              points="0,47 14,44 28,41 42,38 56,36 70,33 84,31 98,29 112,27 126,25 140,24 154,26 168,20 182,16 196,13 210,11 224,9 238,8 252,7 266,7 280,9 294,7 308,6"/>
+            <circle cx="308" cy="6" r="3.5" fill="#5B2D8E"/>
+            <line x1="0" y1="62" x2="310" y2="62" stroke="#DDD" stroke-width="0.5"/>
+            <text x="2" y="62" dy="10" font-size="7.5" fill="#999">Jun 2022</text>
+            <text x="155" y="62" dy="10" font-size="7.5" fill="#999" text-anchor="middle">Jan 2024</text>
+            <text x="308" y="62" dy="10" font-size="7.5" fill="#999" text-anchor="end">May 2026</text>
+          </svg>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px">
+            <div style="text-align:center;padding:5px;background:#F0EEF8;border-radius:5px">
+              <div style="font-size:13px;font-weight:700;color:#5B2D8E">95%</div>
+              <div style="font-size:7.5px;color:#888">Female</div>
+            </div>
+            <div style="text-align:center;padding:5px;background:#FFF3E0;border-radius:5px">
+              <div style="font-size:13px;font-weight:700;color:#E07B29">78%</div>
+              <div style="font-size:7.5px;color:#888">Kanungu</div>
+            </div>
+            <div style="text-align:center;padding:5px;background:#E8F5E9;border-radius:5px">
+              <div style="font-size:13px;font-weight:700;color:#2E7D32">77%</div>
+              <div style="font-size:7.5px;color:#888">Arrest rate</div>
+            </div>
+            <div style="text-align:center;padding:5px;background:#FFEBEE;border-radius:5px">
+              <div style="font-size:13px;font-weight:700;color:#C62828">66%</div>
+              <div style="font-size:7.5px;color:#888">Defilement</div>
+            </div>
+          </div>
+        </div>
+        <div class="cc">
+          <div class="ct">Violence categories (real data)</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+            <svg viewBox="0 0 68 68" width="68" height="68">
+              <circle cx="34" cy="34" r="26" fill="none" stroke="#5B2D8E" stroke-width="11" stroke-dasharray="48 115"/>
+              <circle cx="34" cy="34" r="26" fill="none" stroke="#C62828" stroke-width="11" stroke-dasharray="22 115" stroke-dashoffset="-48"/>
+              <circle cx="34" cy="34" r="26" fill="none" stroke="#E07B29" stroke-width="11" stroke-dasharray="12 115" stroke-dashoffset="-70"/>
+              <circle cx="34" cy="34" r="26" fill="none" stroke="#C9A84C" stroke-width="11" stroke-dasharray="9 115" stroke-dashoffset="-82"/>
+              <circle cx="34" cy="34" r="26" fill="none" stroke="#888" stroke-width="11" stroke-dasharray="7 115" stroke-dashoffset="-91"/>
+              <text x="34" y="37" font-size="8" font-weight="600" fill="#1A1A2E" text-anchor="middle">2,031</text>
+            </svg>
+            <div class="dl">
+              <div class="dli"><div class="dsw" style="background:#5B2D8E"></div>Defilement<span class="dval">1,337</span></div>
+              <div class="dli"><div class="dsw" style="background:#C62828"></div>Rape<span class="dval">349</span></div>
+              <div class="dli"><div class="dsw" style="background:#E07B29"></div>Physical assault<span class="dval">155</span></div>
+              <div class="dli"><div class="dsw" style="background:#C9A84C"></div>Child neglect<span class="dval">87</span></div>
+              <div class="dli"><div class="dsw" style="background:#888"></div>Other<span class="dval">103</span></div>
+            </div>
+          </div>
+          <div style="font-size:8.5px;color:#888;margin-bottom:4px">Cases by district</div>
+          <div class="hbar"><span class="hl">Kanungu</span><div class="ht"><div class="hf" style="width:78%;background:#5B2D8E"></div></div><span class="hv">1,584</span></div>
+          <div class="hbar"><span class="hl">Rukungiri</span><div class="ht"><div class="hf" style="width:22%;background:#E07B29"></div></div><span class="hv">440</span></div>
+          <div class="hbar"><span class="hl">Rubanda/Other</span><div class="ht"><div class="hf" style="width:2%;background:#CCC"></div></div><span class="hv">7</span></div>
+        </div>
+      </div>
+
+      <!-- Row 3: Legal + GIS Map + HIV/Safe Living -->
+      <div class="row3">
+
+        <!-- Legal Pipeline -->
+        <div class="cc">
+          <div class="ct">⚖️ Justice pipeline — 738 perpetrators (real data)</div>
+          <div class="lfrow"><span class="lfl">Registered</span><div class="lfbar" style="width:100%;background:#5B2D8E;height:6.5px;border-radius:3px"></div><span class="lfv">738</span></div>
+          <div class="lfrow"><span class="lfl">Arrested</span><div class="lfbar" style="width:77%;background:#1565C0;height:6.5px;border-radius:3px"></div><span class="lfv" style="color:#1565C0;font-weight:600">571</span></div>
+          <div class="lfrow"><span class="lfl">On the run</span><div class="lfbar" style="width:15%;background:#C62828;height:6.5px;border-radius:3px"></div><span class="lfv">112</span></div>
+          <div class="lfrow"><span class="lfl">In court</span><div class="lfbar" style="width:43%;background:#7B1FA2;height:6.5px;border-radius:3px"></div><span class="lfv">320</span></div>
+          <div class="lfrow"><span class="lfl">Won ✅</span><div class="lfbar" style="width:7%;background:#2E7D32;height:6.5px;border-radius:3px"></div><span class="lfv" style="color:#2E7D32;font-weight:600">55</span></div>
+          <div class="lfrow"><span class="lfl">Lost/dismissed</span><div class="lfbar" style="width:3%;background:#E65100;height:6.5px;border-radius:3px"></div><span class="lfv">19</span></div>
+          <div style="display:flex;gap:5px;margin-top:7px;flex-wrap:wrap">
+            <span style="font-size:8px;background:#E8F5E9;color:#2E7D32;padding:2px 8px;border-radius:8px;font-weight:600">77% arrest rate ✅</span>
+            <span style="font-size:8px;background:#FFEBEE;color:#C62828;padding:2px 8px;border-radius:8px;font-weight:600">7.5% conviction ⚠</span>
+          </div>
+          <div style="margin-top:8px;font-size:8.5px;color:#888;margin-bottom:4px;font-weight:500">Days to apprehension (V3 new field)</div>
+          <div style="display:flex;gap:5px">
+            <div style="text-align:center;padding:5px 7px;background:#E3F2FD;border-radius:5px;flex:1">
+              <div style="font-size:14px;font-weight:700;color:#1565C0">47</div>
+              <div style="font-size:7.5px;color:#1565C0">mean days</div>
+            </div>
+            <div style="text-align:center;padding:5px 7px;background:#E3F2FD;border-radius:5px;flex:1">
+              <div style="font-size:14px;font-weight:700;color:#1565C0">48</div>
+              <div style="font-size:7.5px;color:#1565C0">median days</div>
+            </div>
+            <div style="text-align:center;padding:5px 7px;background:#EDE7F6;border-radius:5px;flex:1">
+              <div style="font-size:14px;font-weight:700;color:#5B2D8E">1–3m</div>
+              <div style="font-size:7.5px;color:#5B2D8E">typical range</div>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:8.5px;color:#888;font-weight:500;margin-bottom:4px">Perpetrator relationship (65% = neighbors)</div>
+          <div class="hbar"><span class="hl">Neighbor</span><div class="ht"><div class="hf" style="width:100%;background:#C62828"></div></div><span class="hv" style="color:#C62828;font-weight:600">480</span></div>
+          <div class="hbar"><span class="hl">Stranger</span><div class="ht"><div class="hf" style="width:19%;background:#7B1FA2"></div></div><span class="hv">89</span></div>
+          <div class="hbar"><span class="hl">Sibling</span><div class="ht"><div class="hf" style="width:7%;background:#E07B29"></div></div><span class="hv">34</span></div>
+          <div class="hbar"><span class="hl">Father/Mother</span><div class="ht"><div class="hf" style="width:5%;background:#E07B29"></div></div><span class="hv">24</span></div>
+        </div>
+
+        <!-- GIS Map Column -->
+        <div class="cc" style="padding:0;overflow:hidden;display:flex;flex-direction:column">
+          <div style="padding:9px 11px 5px;font-size:9.5px;font-weight:500;color:#555">
+            🗺️ Operational districts · 1,169 survivor GPS · 1,700 perpetrator GPS
+          </div>
+          <div class="mapcard" style="margin:0 7px;flex:1">
+            <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 220 115" preserveAspectRatio="none">
+              <!-- Kanungu -->
+              <path d="M22,10 L72,7 L102,18 L115,35 L110,58 L85,68 L56,70 L30,63 L14,44 L18,24 Z"
+                    fill="rgba(91,45,142,0.1)" stroke="#5B2D8E" stroke-width="1.2"/>
+              <!-- Rukungiri -->
+              <path d="M108,16 L148,12 L170,28 L174,54 L162,68 L136,74 L112,63 L106,40 Z"
+                    fill="rgba(224,123,41,0.1)" stroke="#E07B29" stroke-width="1.2"/>
+              <!-- Rubanda -->
+              <path d="M54,67 L96,62 L118,70 L121,94 L100,104 L70,102 L50,94 L48,79 Z"
+                    fill="rgba(0,105,92,0.1)" stroke="#00695C" stroke-width="1.2"/>
+              <text x="58" y="38" font-size="7.5" fill="#2A0E5C" font-weight="600">Kanungu</text>
+              <text x="128" y="45" font-size="7.5" fill="#7B4800" font-weight="600">Rukungiri</text>
+              <text x="80" y="87" font-size="7" fill="#00362E" font-weight="600">Rubanda</text>
+            </svg>
+            <!-- Incident dots -->
+            <div class="mdot" style="width:11px;height:11px;background:rgba(198,40,40,0.78);top:20px;left:46px"></div>
+            <div class="mdot" style="width:9px;height:9px;background:rgba(198,40,40,0.68);top:35px;left:62px"></div>
+            <div class="mdot" style="width:13px;height:13px;background:rgba(198,40,40,0.82);top:28px;left:32px"></div>
+            <div class="mdot" style="width:7px;height:7px;background:rgba(198,40,40,0.60);top:46px;left:55px"></div>
+            <div class="mdot" style="width:9px;height:9px;background:rgba(198,40,40,0.65);top:52px;left:78px"></div>
+            <div class="mdot" style="width:8px;height:8px;background:rgba(224,123,41,0.75);top:28px;left:124px"></div>
+            <div class="mdot" style="width:10px;height:10px;background:rgba(198,40,40,0.62);top:46px;left:138px"></div>
+            <div class="mdot" style="width:7px;height:7px;background:rgba(0,105,92,0.65);top:76px;left:84px"></div>
+            <div class="mdot" style="width:8px;height:8px;background:rgba(0,105,92,0.72);top:86px;left:64px"></div>
+            <!-- Healing centres -->
+            <div class="hcmark" style="background:#5B2D8E;top:15px;left:62px" title="Kambuga HC"></div>
+            <div class="hcmark" style="background:#5B2D8E;top:29px;left:28px" title="Kanungu HC"></div>
+            <div class="hcmark" style="background:#5B2D8E;top:37px;left:83px" title="Kihihi HC"></div>
+            <div class="hcmark" style="background:#5B2D8E;top:22px;left:112px" title="Kebisoni HC"></div>
+            <div class="hcmark" style="background:#5B2D8E;top:44px;left:57px" title="Nyamirama HC"></div>
+            <!-- Map legend -->
+            <div style="position:absolute;bottom:6px;left:7px;display:flex;gap:10px">
+              <div style="display:flex;align-items:center;gap:3px;font-size:7.5px;color:#333;font-family:DM Sans,sans-serif">
+                <div style="width:8px;height:8px;border-radius:50%;background:rgba(198,40,40,0.72)"></div>Incident
+              </div>
+              <div style="display:flex;align-items:center;gap:3px;font-size:7.5px;color:#333;font-family:DM Sans,sans-serif">
+                <div style="width:9px;height:9px;border-radius:50%;background:#5B2D8E;border:2px solid white"></div>Healing centre
+              </div>
+            </div>
+          </div>
+          <div style="padding:6px 11px 9px;font-size:7.5px;color:#888;line-height:1.5">
+            🔒 GPS jittered ±300m · Crime scene GPS (V3 new field)<br>
+            Drilldown: district → subcounty → parish → village → Full GIS page
+          </div>
+        </div>
+
+        <!-- HIV + Crime Scene + Safe Living -->
+        <div style="display:flex;flex-direction:column;gap:7px">
+
+          <!-- HIV Status (V3 new) -->
+          <div class="cc">
+            <div class="ct">🧬 Perpetrator HIV status (V3 new · 1,005 tested)</div>
+            <div class="hiv-bar">
+              <div style="width:72%;background:#2E7D32"></div>
+              <div style="width:18%;background:#C62828"></div>
+              <div style="width:6%;background:#E65100"></div>
+              <div style="width:4%;background:#888"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+              <div class="dli"><div class="dsw" style="background:#2E7D32"></div><span>Negative</span><span class="dval">727</span></div>
+              <div class="dli"><div class="dsw" style="background:#C62828"></div><span>Positive</span><span class="dval" style="color:#C62828">181</span></div>
+              <div class="dli"><div class="dsw" style="background:#E65100"></div><span>Inconclusive</span><span class="dval">56</span></div>
+              <div class="dli"><div class="dsw" style="background:#888"></div><span>Unknown</span><span class="dval">41</span></div>
+            </div>
+            <div style="margin-top:5px;padding:4px 8px;background:#FFEBEE;border-radius:4px;font-size:8px;color:#C62828">
+              181 HIV+ perpetrators → survivor PEP counselling flagged
+            </div>
+          </div>
+
+          <!-- Crime scene types (V3 new) -->
+          <div class="cc">
+            <div class="ct">📍 Crime scene type — 738 cases (V3 field)</div>
+            <div class="hbar"><span class="hl">At/near home</span><div class="ht"><div class="hf" style="width:60%;background:#5B2D8E"></div></div><span class="hv">442</span></div>
+            <div class="hbar"><span class="hl">Bush / forest</span><div class="ht"><div class="hf" style="width:12%;background:#2E7D32"></div></div><span class="hv">86</span></div>
+            <div class="hbar"><span class="hl">School premises</span><div class="ht"><div class="hf" style="width:8%;background:#E07B29"></div></div><span class="hv">59</span></div>
+            <div class="hbar"><span class="hl">Water collection</span><div class="ht"><div class="hf" style="width:8%;background:#1565C0"></div></div><span class="hv">58</span></div>
+            <div class="hbar"><span class="hl">Path / road</span><div class="ht"><div class="hf" style="width:6%;background:#C9A84C"></div></div><span class="hv">44</span></div>
+            <div class="hbar"><span class="hl">Market / other</span><div class="ht"><div class="hf" style="width:5%;background:#888"></div></div><span class="hv">49</span></div>
+            <div style="margin-top:5px;font-size:8px;color:#888">Time of day (V3) · 25% night · 32% evening</div>
+            <div style="display:flex;gap:4px;margin-top:3px">
+              <span class="rbdg rh">Night 25%</span>
+              <span class="rbdg rm">Evening 32%</span>
+              <span class="rbdg rl">Daytime 43%</span>
+            </div>
+          </div>
+
+          <!-- Safe Living -->
+          <div class="cc">
+            <div class="ct">🏠 Evidence-based safe living guidance</div>
+            <div class="stip">⚠ <strong>65% neighbor</strong> — not strangers. Talk to children about body safety.</div>
+            <div class="stip">⚠ <strong>Water points</strong> are HIGH RISK — never send children alone.</div>
+            <div class="stip">🕖 <strong>18:00–20:00</strong> = highest incident frequency — avoid isolated paths.</div>
+            <div class="stip">💡 Report within <strong>72 hours</strong> — PEP &amp; evidence collection possible.</div>
+            <div class="stip">🏥 Know your nearest <strong>Healing Centre</strong> — safe destination (see GIS map).</div>
+            <div style="margin-top:5px;font-size:8px;color:#888">
+              → Full risk map &amp; community briefing guide on GIS Dashboard page
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+</body>
+</html>
