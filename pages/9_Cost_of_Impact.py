@@ -54,7 +54,7 @@ st.markdown(f"""
 # Load live data for context (actual throughput numbers)
 try:
     sv = load_survivors()
-    sv_e = sv[sv.get("report_category","").str.contains("enrollment", na=False)]
+    sv_e = sv[sv.get("report_category", pd.Series("", index=sv.index)).str.contains("enrollment", na=False)]
     ot = load_outreach()
     sc = load_school()
     actual_survivors  = len(sv_e)
@@ -522,7 +522,7 @@ st.caption("Based on actual survivor throughput data per healing centre "
 
 try:
     sv_data = load_survivors()
-    sv_enroll = sv_data[sv_data.get("report_category","").str.contains("enrollment",na=False)]
+    sv_enroll = sv_data[sv_data.get("report_category", pd.Series("", index=sv_data.index)).str.contains("enrollment",na=False)]
     hc_col = next((c for c in sv_enroll.columns if "healing_center_label" in c), None)
     if hc_col:
         hc_counts = sv_enroll.groupby(hc_col)["client_id"].count().reset_index()

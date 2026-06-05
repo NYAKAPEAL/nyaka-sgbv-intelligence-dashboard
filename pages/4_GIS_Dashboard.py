@@ -25,8 +25,8 @@ sel_layer=st.sidebar.multiselect("Map Layers",
 filt={"years":sel_yrs,"district":None if sel_dist=="All Districts" else sel_dist}
 sv_f=apply_filters(sv,filt); pp_f=apply_filters(pp,filt)
 ot_f=apply_filters(ot,filt); sc_f=apply_filters(sc,filt)
-sv_e=sv_f[sv_f.get("report_category","").str.contains("enrollment",na=False)]
-pp_e=pp_f[pp_f.get("is_enrolled",pd.Series(dtype=bool))] if "is_enrolled" in pp_f.columns else pp_f[pp_f.get("report_category","")=="enrollment"]
+sv_e=sv_f[sv_f.get("report_category", pd.Series("", index=sv_f.index)).str.contains("enrollment",na=False)]
+pp_e=pp_f[pp_f.get("is_enrolled",pd.Series(dtype=bool))] if "is_enrolled" in pp_f.columns else pp_f[pp_f.get("report_category", pd.Series("", index=pp_f.index))=="enrollment"]
 
 page_header("GIS Intelligence Dashboard",
             "Incident hotspots · crime scene mapping · outreach coverage · safe zone analysis · Kanungu · Rukungiri · Rubanda","🗺️")

@@ -14,7 +14,7 @@ sidebar_panel()
 page_header("Data Quality Dashboard","Completeness · GPS coverage · duplicates · submission trends · enumerator performance","🔍")
 safe_notice()
 
-sv_e=sv[sv.get("report_category","").str.contains("enrollment",na=False)]
+sv_e=sv[sv.get("report_category", pd.Series("", index=sv.index)).str.contains("enrollment",na=False)]
 
 # Completeness
 key_fields=["client_id","client_gender","client_age","date","assault_label","district",

@@ -65,7 +65,7 @@ pp_f  = apply_filters(pp, filt)
 ot_f  = apply_filters(ot, filt)
 sc_f  = apply_filters(sc, filt)
 
-sv_e = sv_f[sv_f.get("report_category","").str.contains("enrollment", na=False)]
+sv_e = sv_f[sv_f.get("report_category", pd.Series("", index=sv_f.index)).str.contains("enrollment", na=False)]
 pp_e = pp_f[pp_f.get("is_enrolled", pd.Series(dtype=bool))]
 
 kpis = compute_kpis(sv_f, pp_f, ot_f, sc_f)

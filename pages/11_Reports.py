@@ -90,7 +90,7 @@ with col2:
                                  placeholder="e.g. D. Ainamani, MEAL Manager")
 
 # Preview the month's headline numbers before generating
-sv_e = sv[sv.get("report_category","").str.contains("enrollment", na=False)] \
+sv_e = sv[sv.get("report_category", pd.Series("", index=sv.index)).str.contains("enrollment", na=False)] \
        if "report_category" in sv.columns else sv
 d_all = pd.to_datetime(sv_e.get("date_enrolled"), errors="coerce") if len(sv_e) else pd.Series(dtype="datetime64[ns]")
 sv_month = sv_e[(d_all.dt.year == sel_year) & (d_all.dt.month == sel_month)] if len(sv_e) else pd.DataFrame()

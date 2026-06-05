@@ -102,7 +102,7 @@ def _date_filter(df, col, start, end):
 # ─────────────────────────────────────────────────────────────────────────────
 def _count_survivors(data, q):
     sv = data["survivors"]
-    sv = sv[sv.get("report_category", "").str.contains("enrollment", na=False)] \
+    sv = sv[sv.get("report_category", pd.Series("", index=sv.index)).str.contains("enrollment", na=False)] \
         if "report_category" in sv.columns else sv
     district = _extract_district(q)
     start, end, lbl = _extract_dates(q)
@@ -234,7 +234,7 @@ def _case_lookup(data, q):
 def _breakdown(data, q):
     """Breakdowns by district/violence type for survivors."""
     sv = data["survivors"]
-    sv = sv[sv.get("report_category", "").str.contains("enrollment", na=False)] \
+    sv = sv[sv.get("report_category", pd.Series("", index=sv.index)).str.contains("enrollment", na=False)] \
         if "report_category" in sv.columns else sv
     ql = q.lower()
     if "violence" in ql or "type" in ql or "defilement" in ql or "rape" in ql:

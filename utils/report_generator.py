@@ -271,10 +271,10 @@ def build_monthly_report(data: dict, year: int, month: int,
     ot = data.get("outreach", pd.DataFrame())
     sc = data.get("school", pd.DataFrame())
 
-    sv_m = _month_window(sv[sv.get("report_category","").str.contains("enrollment", na=False)]
+    sv_m = _month_window(sv[sv.get("report_category", pd.Series("", index=sv.index)).str.contains("enrollment", na=False)]
                          if "report_category" in sv.columns else sv,
                          "date_enrolled", year, month) if len(sv) else pd.DataFrame()
-    pp_e = pp[pp.get("report_category","") == "enrollment"] if "report_category" in pp.columns else pp
+    pp_e = pp[pp.get("report_category", pd.Series("", index=pp.index)) == "enrollment"] if "report_category" in pp.columns else pp
     pp_m = _month_window(pp_e, "date_enrolled", year, month) if len(pp_e) else pd.DataFrame()
     ppf_m = _month_window(ppf, "follow_up_date", year, month) if len(ppf) else pd.DataFrame()
     ot_m = _month_window(ot, "date", year, month) if len(ot) else pd.DataFrame()

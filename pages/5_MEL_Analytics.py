@@ -12,9 +12,9 @@ if not can_access("mel"): st.error("🔒 Access denied."); st.stop()
 DATA=load_all(); sv=DATA["survivors"]; pp=DATA["perpetrators"]; ot=DATA["outreach"]; sc=DATA["school"]
 sidebar_panel()
 kpis=compute_kpis(sv,pp,ot,sc)
-sv_e=sv[sv.get("report_category","").str.contains("enrollment",na=False)]
-pp_e=pp[pp.get("is_enrolled",pd.Series(dtype=bool))] if "is_enrolled" in pp.columns else pp[pp.get("report_category","")=="enrollment"]
-pp_f=pp[pp.get("is_followup",pd.Series(dtype=bool))] if "is_followup" in pp.columns else pp[pp.get("report_category","").str.contains("followup",na=False)]
+sv_e=sv[sv.get("report_category", pd.Series("", index=sv.index)).str.contains("enrollment",na=False)]
+pp_e=pp[pp.get("is_enrolled",pd.Series(dtype=bool))] if "is_enrolled" in pp.columns else pp[pp.get("report_category", pd.Series("", index=pp.index))=="enrollment"]
+pp_f=pp[pp.get("is_followup",pd.Series(dtype=bool))] if "is_followup" in pp.columns else pp[pp.get("report_category", pd.Series("", index=pp.index)).str.contains("followup",na=False)]
 
 page_header("M&E Analytics","Logframe indicators · targets · disaggregation engine · quarterly performance","📈")
 safe_notice()

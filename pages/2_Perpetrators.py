@@ -20,8 +20,8 @@ sel_dist=st.sidebar.selectbox("District",["All","Kanungu","Rukungiri","Rubanda"]
 filt={"years":sel_yrs,"district":sel_dist}
 pp_f=apply_filters(pp,filt)
 
-pp_e=pp_f[pp_f.get("is_enrolled",pd.Series(dtype=bool))] if "is_enrolled" in pp_f.columns else pp_f[pp_f.get("report_category","")=="enrollment"]
-pp_fu=pp_f[pp_f.get("is_followup",pd.Series(dtype=bool))] if "is_followup" in pp_f.columns else pp_f[pp_f.get("report_category","").str.contains("followup",na=False)]
+pp_e=pp_f[pp_f.get("is_enrolled",pd.Series(dtype=bool))] if "is_enrolled" in pp_f.columns else pp_f[pp_f.get("report_category", pd.Series("", index=pp_f.index))=="enrollment"]
+pp_fu=pp_f[pp_f.get("is_followup",pd.Series(dtype=bool))] if "is_followup" in pp_f.columns else pp_f[pp_f.get("report_category", pd.Series("", index=pp_f.index)).str.contains("followup",na=False)]
 
 page_header("Perpetrator Intake & Legal Outcomes","Registration · legal pipeline · incident narrations · safe living intelligence","⚖️")
 safe_notice()

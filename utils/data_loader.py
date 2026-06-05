@@ -396,11 +396,21 @@ def apply_filters(df: pd.DataFrame, f: dict) -> pd.DataFrame:
     return d
 
 def compute_kpis(sv, pp, ot, sc) -> dict:
-    sv_e = sv[sv.get("report_category","").str.contains("enrollment",na=False)] if len(sv) else sv
+    sv_e = sv[sv.get("report_category", pd.Series("", index=sv.index)).str.contains("enrollment",na=False)] if len(sv) else sv
     pp_e = pp[pp["is_enrolled"]] if "is_enrolled" in pp.columns and len(pp) else pp
     pp_f = pp[pp.get("is_followup", pd.Series(dtype=bool))] if "is_followup" in pp.columns and len(pp) else pp
 
-    total   = len(sv_e)
+    total   = sv_e["client_id"].nunique() if "client_id" in sv_e.columns and len(sv_e) else len(sv_e)
+    # Real open/closed from the case rollup. case_status_clean is NOT in the live
+    # data, so the old default labelled every case "Active" — derive it properly.
+    try:
+        _roll = load_perp_narrative()
+        if "client_id" in sv_e.columns and "client_id" in _roll.columns:
+            _roll = _roll[_roll["client_id"].astype(str).isin(set(sv_e["client_id"].astype(str)))]
+        _closed = int(_roll.get("is_closed", pd.Series(dtype=bool)).fillna(False).sum())
+        active_cases = max(total - _closed, 0)
+    except Exception:
+        active_cases = total
     arrested= int(pp_e["arrested"].sum()) if "arrested" in pp_e.columns else 0
     won     = int(pp_f["case_won"].sum()) if "case_won" in pp_f.columns else 0
     ot_r    = int(ot["total"].sum()) if "total" in ot.columns else 0
@@ -408,7 +418,7 @@ def compute_kpis(sv, pp, ot, sc) -> dict:
 
     return {
         "total_survivors":   total,
-        "active_cases":      int((~sv_e.get("case_status_clean", pd.Series(["Active"]*total)).isin(["Closed"])).sum()),
+        "active_cases":      active_cases,
         "crisis_cases":      int(sv_e.get("has_crisis", pd.Series(dtype=bool)).sum()),
         "children":          int(sv_e.get("is_child", pd.Series(dtype=bool)).sum()),
         "perpetrators":      len(pp_e),

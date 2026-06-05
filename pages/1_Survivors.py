@@ -21,7 +21,7 @@ sel_yrs = st.sidebar.multiselect("Year",yrs,default=yrs,key="sv_yr")
 sel_dist = st.sidebar.selectbox("District",["All","Kanungu","Rukungiri","Rubanda"],key="sv_d")
 filt = {"years":sel_yrs,"district":sel_dist}
 sv_f = apply_filters(sv,filt)
-sv_e = sv_f[sv_f.get("report_category","").str.contains("enrollment",na=False)]
+sv_e = sv_f[sv_f.get("report_category", pd.Series("", index=sv_f.index)).str.contains("enrollment",na=False)]
 
 page_header("Survivor Case Management","Enrollment · demographics · case tracking · mental health · safe living","👤")
 safe_notice()
@@ -48,15 +48,23 @@ with tab1:
     section("Case Status Distribution","purple")
     col1,col2=st.columns(2)
     with col1:
-        cs=sv_e.get("case_status_clean",pd.Series(["Active"]*total)).value_counts().reset_index()
+        # Real case status from the follow-up rollup (case_status_clean is not in
+        # the live data, which is why this previously showed everything as Active).
+        _cn = load_perp_narrative()
+        if "client_id" in sv_e.columns and "client_id" in _cn.columns:
+            _cn = _cn[_cn["client_id"].astype(str).isin(set(sv_e["client_id"].astype(str)))]
+        _stat = (_cn.get("last_status", pd.Series(dtype=str)).fillna("No follow-up yet")
+                 .replace("", "No follow-up yet").astype(str))
+        cs = _stat.value_counts().head(8).reset_index()
         cs.columns=["Status","Count"]
         fig=go.Figure(go.Pie(labels=cs["Status"],values=cs["Count"],hole=0.55,
-            marker=dict(colors=[C["purple"],C["green"],C["orange"],C["grey"],C["red"]],
-                        line=dict(color="white",width=2)),
+            marker=dict(line=dict(color="white",width=2)),
             textinfo="label+percent",textfont=dict(size=10)))
         fig.update_layout(template="plotly_white",height=300,margin=dict(l=36,r=16,t=48,b=36),
-                          title="Case Status",paper_bgcolor="rgba(0,0,0,0)")
+                          title="Case status (latest recorded)",paper_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig,use_container_width=True)
+        st.caption("'No follow-up yet' means a case has been enrolled but has no logged "
+                   "follow-up activity, so no status has been recorded for it yet.")
     with col2:
         monthly=sv_e.groupby("month_label")["client_id"].count().reset_index()
         monthly.columns=["Month","Cases"]; monthly=monthly.sort_values("Month").tail(30)
