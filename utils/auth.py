@@ -109,3 +109,29 @@ def show_login():
                     st.rerun()
                 else:
                     st.error("Invalid credentials.")
+
+
+def sidebar_panel():
+    """Sidebar: signed-in identity, live/local data-source status, refresh, sign-out."""
+    name  = st.session_state.get("name", "User")
+    rcfg  = role_cfg()
+    rlabel = rcfg.get("label", (role().title() if role() else "User"))
+    ricon  = rcfg.get("icon", "👤")
+    st.sidebar.markdown(
+        f"<div style='background:{C['purple']};color:#FFFFFF;padding:12px 14px;"
+        f"border-radius:10px;margin-bottom:6px;'>"
+        f"<div style='font-size:14px;font-weight:700;'>{ricon} {name}</div>"
+        f"<div style='font-size:11px;opacity:0.9;margin-top:2px;'>{rlabel}</div></div>",
+        unsafe_allow_html=True)
+    # Live vs local data-source banner + manual refresh (defined in gsheets_source)
+    try:
+        from utils.gsheets_source import render_data_status
+        render_data_status(st, C)
+    except Exception:
+        pass
+    if st.sidebar.button("🔓  Sign out", use_container_width=True, key="logout_btn"):
+        logout()
+        st.rerun()
+    st.sidebar.markdown(
+        f"<div style='font-size:10px;color:{C['grey']};text-align:center;margin-top:8px;'>"
+        f"🔒 Confidential · sessions are logged</div>", unsafe_allow_html=True)
