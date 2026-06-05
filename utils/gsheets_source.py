@@ -162,9 +162,9 @@ def _fetch_sheet(stream_key: str) -> tuple:
             _FETCH_ERRORS[stream_key] = f"{type(e).__name__}: {str(e)[:400]}"
 
     # 2. Fallback: local CSV
-    if fallback and os.path.exists(fallback):
-        try:
-            return pd.read_csv(fallback, low_memory=False), "local"
+    # TEMP DEBUG: disable fallback
+# if fallback and os.path.exists(fallback):
+#     return pd.read_csv(fallback), "local"
         except Exception:
             pass
     return pd.DataFrame(), "empty"
@@ -172,10 +172,16 @@ def _fetch_sheet(stream_key: str) -> tuple:
 
 def fetch(stream_key: str) -> pd.DataFrame:
     """Public fetch — returns just the DataFrame and records the source mode."""
+    
     df, source = _fetch_sheet(stream_key)
+
+    # DEBUG LINE (temporary - remove later)
+    st.write(f"[DEBUG] {stream_key} -> rows={df.shape[0]}, cols={df.shape[1]}, source={source}")
+
     # Track which sources are live vs local for the sidebar indicator
     modes = st.session_state.setdefault("_data_source_modes", {})
     modes[stream_key] = source
+
     return df
 
 
