@@ -133,9 +133,15 @@ section("Case Trends & Violence Profile", "purple")
 col1, col2 = st.columns([3,2])
 
 with col1:
-    monthly = sv_e.groupby("month_label")["client_id"].count().reset_index()
-    monthly.columns = ["Month","Cases"]
-    monthly = monthly.sort_values("Month").tail(36)
+    if not len(sv_e) or "month_label" not in sv_e.columns:
+        safe_notice("No survivor enrollment data is loading yet. If the data source shows "
+                    "LIVE but figures are zero, the survivor sheet may be on a different tab "
+                    "or its column headers differ from the expected format.", "warning")
+        monthly = pd.DataFrame({"Month": [], "Cases": []})
+    else:
+        monthly = sv_e.groupby("month_label")["client_id"].count().reset_index()
+        monthly.columns = ["Month","Cases"]
+        monthly = monthly.sort_values("Month").tail(36)
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=monthly["Month"],y=monthly["Cases"],
         mode="lines+markers",line=dict(color=C["purple"],width=2.5),

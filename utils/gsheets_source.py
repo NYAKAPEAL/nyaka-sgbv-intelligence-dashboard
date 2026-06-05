@@ -129,10 +129,27 @@ def _fetch_sheet(stream_key: str) -> tuple:
                     ws = sh.worksheet(cfg["worksheet"])
                 else:
                     ws = sh.get_worksheet(0)
-                records = ws.get_all_records()   # list of dicts using header row
-                df = pd.DataFrame(records)
-                if len(df):
-                    return df, "live"
+                # get_all_records() raises on sheets with duplicate or blank
+                # headers (common in wide SurveyCTO tools). Parse values manually
+                # so such sheets still load: keep first-seen header names, make
+                # later collisions and blanks unique instead of failing.
+                vals = ws.get_all_values()
+                if vals and len(vals) > 1:
+                    header = vals[0]
+                    seen, clean = {}, []
+                    for i, h in enumerate(header):
+                        h = (str(h).strip() or f"col_{i}")
+                        if h in seen:
+                            seen[h] += 1
+                            h = f"{h}_{seen[h]}"
+                        else:
+                            seen[h] = 0
+                        clean.append(h)
+                    df = pd.DataFrame(vals[1:], columns=clean)
+                    # blank cells come back as "" — treat as missing
+                    df = df.replace("", pd.NA)
+                    if len(df):
+                        return df, "live"
         except Exception:
             # fall through to CSV
             pass
